@@ -364,8 +364,9 @@ void zmq::udp_engine_t::terminate ()
 void zmq::udp_engine_t::sockaddr_to_msg (zmq::msg_t *msg_,
                                          const sockaddr_in *addr_)
 {
-    const char *const name = inet_ntoa (addr_->sin_addr);
-
+    char name[NI_MAXHOST];
+    inet_ntop(addr_->sin_family, &(addr_->sin_addr),
+              name, sizeof(name));
     char port[6];
     const int port_len =
       sprintf (port, "%d", static_cast<int> (ntohs (addr_->sin_port)));
@@ -582,7 +583,7 @@ void zmq::udp_engine_t::in_event ()
     msg_t msg;
 
     if (_options.raw_socket) {
-        zmq_assert (in_address.ss_family == AF_INET);
+        zmq_assert (in_address.ss_family == AF_INET || in_address.ss_family == AF_INET6);
         sockaddr_to_msg (&msg, reinterpret_cast<sockaddr_in *> (&in_address));
 
         body_size = nbytes;
