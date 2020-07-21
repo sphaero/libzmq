@@ -512,7 +512,8 @@ void zmq::udp_engine_t::out_event ()
         rc = sendto (_fd, reinterpret_cast<caddr_t> (_out_buffer), size, 0,
                      (sockaddr *) _out_address, _out_address_len);
 #else
-        rc = sendto (_fd, _out_buffer, size, 0, _out_address, _out_address_len);
+        rc = sendto (_fd, _out_buffer, size, 0, _raw_address.as_sockaddr(),
+                     static_cast<zmq_socklen_t>(_raw_address.sockaddr_len()));
 #endif
         if (rc < 0) {
 #ifdef ZMQ_HAVE_WINDOWS
