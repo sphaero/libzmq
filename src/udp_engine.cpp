@@ -150,9 +150,9 @@ void zmq::udp_engine_t::plug (io_thread_t *io_thread_, session_base_t *session_)
             }
         } else {
             /// XXX fixme ?
-            _out_address = reinterpret_cast<sockaddr *> (&_raw_address);
-            _out_address_len =
-              static_cast<zmq_socklen_t> (sizeof (sockaddr_in));
+            _out_address = _raw_address.as_sockaddr(); // reinterpret_cast<sockaddr *> (&_raw_address);
+            _out_address_len = _raw_address.sockaddr_len();
+              //static_cast<zmq_socklen_t> (sizeof (sockaddr_in));
         }
     }
 
@@ -422,14 +422,36 @@ int zmq::udp_engine_t::resolve_raw_address (const char *name_, size_t length_)
         return -1;
     }
 
-    _raw_address.sin_family = AF_INET;
-    _raw_address.sin_port = htons (port);
-    _raw_address.sin_addr.s_addr = inet_addr (addr_str.c_str ());
+    struct sockaddr_in sa;
+    bool ipv4 = inet_pton(AF_INET, addr_str.c_str(), &(sa.sin_addr))==1;
+    struct sockaddr_in6 sa6;
+    bool ipv6 = inet_pton(AF_INET6, addr_str.c_str(), &(sa6.sin6_addr))==1;
 
-    if (_raw_address.sin_addr.s_addr == INADDR_NONE) {
+    if ( ipv4 )
+    {
+        inet_pton(AF_INET, addr_str.c_str(), &(_raw_address.ipv4.sin_addr) );
+        _raw_address.ipv4.sin_family = AF_INET;
+        if (_raw_address.ipv4.sin_addr.s_addr == INADDR_NONE) {
+            errno = EINVAL;
+            return -1;
+        }
+    }
+    else if (ipv6)
+    {
+        int rc = inet_pton(AF_INET6, addr_str.c_str(), &(_raw_address.ipv6.sin6_addr) );
+        zmq_assert(rc == 1);
+        _raw_address.ipv6.sin6_family = AF_INET6;
+        //if (_raw_address.ipv6.sin6_addr. == INADDR_NONE) {
+        //    errno = EINVAL;
+        //    return -1;
+        //}
+    }
+    else
+    {
         errno = EINVAL;
         return -1;
     }
+    _raw_address.set_port(port);
 
     return 0;
 }

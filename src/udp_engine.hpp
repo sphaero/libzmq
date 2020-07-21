@@ -78,7 +78,7 @@ class udp_engine_t ZMQ_FINAL : public io_object_t, public i_engine
 
     options_t _options;
 
-    sockaddr_in _raw_address;
+    ip_addr_t  _raw_address;
     const struct sockaddr *_out_address;
     zmq_socklen_t _out_address_len;
 

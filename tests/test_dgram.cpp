@@ -71,12 +71,16 @@ void test_roundtrip ()
 
     void *sender = test_context_socket (ZMQ_DGRAM);
     void *listener = test_context_socket (ZMQ_DGRAM);
+    int on = 1;
+    zmq_setsockopt( sender, ZMQ_IPV6, &on, sizeof (ZMQ_IPV6));
+    zmq_setsockopt( listener, ZMQ_IPV6, &on, sizeof (ZMQ_IPV6));
 
-    TEST_ASSERT_SUCCESS_ERRNO (zmq_bind (listener, ENDPOINT_4));
 
-    TEST_ASSERT_SUCCESS_ERRNO (zmq_bind (sender, ENDPOINT_5));
+    TEST_ASSERT_SUCCESS_ERRNO (zmq_bind (listener, "udp://[::1]:5559"));
 
-    str_send_to (sender, test_question, strrchr (ENDPOINT_4, '/') + 1);
+    TEST_ASSERT_SUCCESS_ERRNO (zmq_bind (sender, "udp://[::1]:5560"));
+    //str_send_to (sender, test_question, strrchr (ENDPOINT_4, '/') + 1);
+    str_send_to (sender, test_question, "::1:5559");
 
     str_recv_from (listener, &message_string, &address);
     TEST_ASSERT_EQUAL_STRING (test_question, message_string);
