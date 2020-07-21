@@ -365,7 +365,7 @@ void zmq::udp_engine_t::sockaddr_to_msg (zmq::msg_t *msg_,
                                          const sockaddr_in *addr_)
 {
     char name[NI_MAXHOST];
-    inet_ntop(addr_->sin_family, &(addr_->sin_addr),
+    inet_ntop(addr_->sin_family, addr_,
               name, sizeof(name));
     char port[6];
     const int port_len =
