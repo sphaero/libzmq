@@ -84,7 +84,7 @@ void test_roundtrip ()
 
     str_recv_from (listener, &message_string, &address);
     TEST_ASSERT_EQUAL_STRING (test_question, message_string);
-    TEST_ASSERT_EQUAL_STRING (strrchr (ENDPOINT_5, '/') + 1, address);
+    TEST_ASSERT_EQUAL_STRING ("::1:5560", address);
     free (message_string);
 
     str_send_to (listener, test_answer, address);
@@ -92,7 +92,7 @@ void test_roundtrip ()
 
     str_recv_from (sender, &message_string, &address);
     TEST_ASSERT_EQUAL_STRING (test_answer, message_string);
-    TEST_ASSERT_EQUAL_STRING (strrchr (ENDPOINT_4, '/') + 1, address);
+    TEST_ASSERT_EQUAL_STRING ("::1:5559", address);
     free (message_string);
     free (address);
 
